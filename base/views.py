@@ -74,15 +74,20 @@ def home(request):
         Q(description__icontains=q)
     )
     room_count = rooms.count()
-    print(request)
+
     topic = Topic.objects.all()
-    context = {'rooms': rooms, "topics": topic, "room_count": room_count}
+
+    room_messages = Message.objects.filter(
+        Q(room__topic__name__icontains=q)
+    )
+
+    context = {'rooms': rooms, "topics": topic, "room_count": room_count, "room_messages": room_messages}
     return render(request, "base/home.html", context)
 
 def room(request, pk):
     room = Room.objects.get(id=pk)
     # dont set to message due to flash message variable issue
-    room_messages = room.message_set.all().order_by('-created')
+    room_messages = room.message_set.all()
     participants = room.participants.all()
 
     if request.method == "POST":
